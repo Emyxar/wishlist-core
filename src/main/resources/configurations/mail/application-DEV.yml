@@ -1,0 +1,5 @@
+spring:
+  mail:
+    host: localhost
+    port: 3025
+    protocol: smtp
