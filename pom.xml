@@ -24,6 +24,7 @@
 		<openapi.version>3.1.0</openapi.version>
 		<embedded-redis.version>1.4.3</embedded-redis.version>
 		<greenmail.version>2.1.15</greenmail.version>
+		<openapitools-jackson.version>0.2.13</openapitools-jackson.version>
 	</properties>
 
 	<dependencies>
@@ -140,6 +141,12 @@
 			<version>${jjwt.version}</version>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.openapitools</groupId>
+			<artifactId>jackson-databind-nullable</artifactId>
+			<version>${openapitools-jackson.version}</version>
+			<scope>compile</scope>
+		</dependency>
 
 		<!--  Tests  -->
 		<dependency>
@@ -218,7 +225,7 @@
 							<goal>generate</goal>
 						</goals>
 						<configuration>
-							<inputSpec>${project.basedir}/src/main/resources/openapi.yml</inputSpec>
+							<inputSpec>${project.basedir}/src/main/resources/openapi/openapi.yml</inputSpec>
 							<generatorName>spring</generatorName>
 							<apiPackage>ru.emyxar.wishlist_core.api</apiPackage>
 							<modelPackage>ru.emyxar.wishlist_core.model</modelPackage>

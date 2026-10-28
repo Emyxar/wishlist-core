@@ -1,0 +1,76 @@
+BadRequest:
+  description: Некорректный запрос (400)
+  content:
+    application/json:
+      schema:
+        $ref: '../../openapi.yml#/components/schemas/ApiErrorResponse'
+      example:
+        result: false
+        error:
+          code: BAD_REQUEST
+          message: Введенные данные не соответствуют требованиям
+          details:
+            email: Неверный формат адреса электронной почты
+            password: Пароль должен содержать минимум 8 символов, включая цифру и заглавную букву
+        timestamp: 2026-08-16T12:34:56Z
+
+Unauthorized:
+  description: Пользователь не авторизован - отсутствует, истёк или невалиден accessToken (401)
+  content:
+  application/json:
+    schema:
+      $ref: '../../openapi.yml#/components/schemas/ApiErrorResponse'
+    examples:
+      missingToken:
+        summary: Токен отсутствует
+        value:
+          result: false
+          timestamp: 2026-08-16T12:34:56Z
+          error:
+            code: UNAUTHORIZED
+            message: Требуется авторизация
+      expiredToken:
+        summary: Токен истёк
+        value:
+          result: false
+          timestamp: 2026-08-16T12:34:56Z
+          error:
+            code: TOKEN_EXPIRED
+            message: Срок действия токена истёк
+      invalidToken:
+        summary: Токен невалиден
+        value:
+          result: false
+          timestamp: 2026-08-16T12:34:56Z
+          error:
+            code: TOKEN_INVALID
+            message: Токен недействителен
+
+Forbidden:
+  description: Доступ запрещен (403)
+  content:
+    application/json:
+      schema:
+        $ref: '../../openapi.yml#/components/schemas/ApiErrorResponse'
+      example:
+        result: false
+        error:
+          code: FORBIDDEN
+          message: Доступ к ресурсу запрещен
+          details: Недостаточно прав для просмотра этой информации
+        timestamp: 2026-08-16T12:34:56Z
+
+InternalServerError:
+  description: Внутренняя ошибка сервера (500)
+  content:
+    application/json:
+      schema:
+        $ref: '../../openapi.yml#/components/schemas/ApiErrorResponse'
+      example:
+        result: false
+        error:
+          code: INTERNAL_SERVER_ERROR
+          message: Внутренняя ошибка сервера. Попробуйте позже
+          details:
+            traceId: a1b2c3d4-e5f6-7890-abcd-ef1234567890
+        timestamp: 2026-08-16T12:34:56Z
