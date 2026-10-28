@@ -19,7 +19,7 @@ ApiError:
 ApiErrorResponse:
   type: object
   properties:
-    result:
+    status:
       type: boolean
     data:
       type: object
