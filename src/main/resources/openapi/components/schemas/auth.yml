@@ -1,0 +1,205 @@
+RegisterV1Request:
+  type: object
+  properties:
+    email:
+      type: string
+      example: example@email.com
+      format: email
+    fullName:
+      type: string
+      maxLength: 254
+      minLength: 1
+    password:
+      type: string
+      maxLength: 254
+      minLength: 8
+    confirmPassword:
+      type: string
+      maxLength: 254
+      minLength: 8
+
+RegisterV1Response:
+  type: object
+  properties:
+    id:
+      type: string
+
+ApiRegisterV1Response:
+  type: object
+  properties:
+    status:
+      type: boolean
+    data:
+      $ref: '#/RegisterV1Response'
+    error:
+      $ref: './common.yml#/ApiError'
+    timestamp:
+      type: string
+      format: date-time
+
+LoginV1Request:
+  type: object
+  properties:
+    email:
+      type: string
+      example: example@email.com
+      format: email
+    password:
+      type: string
+      maxLength: 254
+      minLength: 8
+
+LoginV1Response:
+  type: object
+  properties:
+    id:
+      type: string
+    accessToken:
+      type: string
+    refreshToken:
+      type: string
+
+ApiLoginV1Response:
+  type: object
+  properties:
+    status:
+      type: boolean
+    data:
+      $ref: '#/LoginV1Response'
+    error:
+      $ref: './common.yml#/ApiError'
+    timestamp:
+      type: string
+      format: date-time
+
+RefreshV1Request:
+  type: object
+  properties:
+    refreshToken:
+      type: string
+
+RefreshV1Response:
+  type: object
+  properties:
+    accessToken:
+      type: string
+
+ApiRefreshV1Response:
+  type: object
+  properties:
+    status:
+      type: boolean
+    data:
+      $ref: '#/RefreshV1Response'
+    error:
+      $ref: './common.yml#/ApiError'
+    timestamp:
+      type: string
+      format: date-time
+
+LogoutV1Request:
+  type: object
+  properties:
+    accessToken:
+      type: string
+    refreshToken:
+      type: string
+
+ApiLogoutV1Response:
+  type: object
+  properties:
+    status:
+      type: boolean
+    data:
+      type: object
+      nullable: true
+    error:
+      $ref: './common.yml#/ApiError'
+    timestamp:
+      type: string
+      format: date-time
+
+ForgotPasswordV1Request:
+  type: object
+  properties:
+    email:
+      type: string
+      example: example@email.com
+      format: email
+
+ForgotPasswordV1Response:
+  type: object
+  properties:
+    resetId:
+      type: string
+
+ApiForgotPasswordV1Response:
+  type: object
+  properties:
+    status:
+      type: boolean
+    data:
+      $ref: '#/ForgotPasswordV1Response'
+    error:
+      $ref: './common.yml#/ApiError'
+    timestamp:
+      type: string
+      format: date-time
+
+VerifyCodeV1Request:
+  type: object
+  properties:
+    resetId:
+      type: string
+    code:
+      type: string
+      example: 123456
+      maxLength: 6
+      minLength: 1
+
+VerifyCodeV1Response:
+  type: object
+  properties:
+    actionToken:
+      type: string
+
+ApiVerifyCodeV1Response:
+  type: object
+  properties:
+    status:
+      type: boolean
+    data:
+      $ref: '#/VerifyCodeV1Response'
+    error:
+      $ref: './common.yml#/ApiError'
+    timestamp:
+      type: string
+      format: date-time
+
+ResetPasswordV1Request:
+  type: object
+  properties:
+    actionToken:
+      type: string
+    password:
+      type: string
+      maxLength: 254
+      minLength: 8
+    confirmPassword:
+      type: string
+      maxLength: 254
+      minLength: 8
+
+ApiResetPasswordV1Response:
+  type: object
+  properties:
+    status:
+      type: boolean
+    data:
+      type: object
+      nullable: true
+    error:
+      $ref: './common.yml#/ApiError'
+    timestamp:
+      type: string
+      format: date-time

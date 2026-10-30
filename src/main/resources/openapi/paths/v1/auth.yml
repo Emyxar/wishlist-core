@@ -1,0 +1,177 @@
+register:
+  post:
+    tags:
+      - auth
+    summary: Регистрация пользователя
+    operationId: v1RegistrationApi
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/auth.yml#/RegisterV1Request'
+    responses:
+      '200':
+        description: Успешная регистрация пользователя
+        content:
+          application/json:
+            schema:
+              $ref: '../../components/schemas/auth.yml#/ApiRegisterV1Response'
+      '400':
+        $ref: '../../components/responses/errors.yml#/BadRequest'
+      '500':
+        $ref: '../../components/responses/errors.yml#/InternalServerError'
+
+login:
+  post:
+    tags:
+      - auth
+    summary: Авторизация пользователя
+    operationId: v1LoginApi
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/auth.yml#/LoginV1Request'
+    responses:
+      '200':
+        description: Успешная авторизация пользователя
+        content:
+          application/json:
+            schema:
+              $ref: '../../components/schemas/auth.yml#/ApiLoginV1Response'
+      '400':
+        $ref: '../../components/responses/errors.yml#/BadRequest'
+      '500':
+        $ref: '../../components/responses/errors.yml#/InternalServerError'
+
+refresh:
+  post:
+    tags:
+      - auth
+    summary: Запрос access токена
+    operationId: v1RefreshApi
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/auth.yml#/RefreshV1Request'
+    responses:
+      '200':
+        description: Токен успешно получен
+        content:
+          application/json:
+            schema:
+              $ref: '../../components/schemas/auth.yml#/ApiRefreshV1Response'
+      '400':
+        $ref: '../../components/responses/errors.yml#/BadRequest'
+      '401':
+        $ref: '../../components/responses/errors.yml#/Unauthorized'
+      '500':
+        $ref: '../../components/responses/errors.yml#/InternalServerError'
+
+logout:
+  post:
+    tags:
+      - auth
+    summary: Выход из учетной записи
+    operationId: v1LogoutApi
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/auth.yml#/LogoutV1Request'
+    responses:
+      '200':
+        description: Пользователь вышел из учетной записи
+        content:
+          application/json:
+            schema:
+              $ref: '../../components/schemas/auth.yml#/ApiLogoutV1Response'
+      '400':
+        $ref: '../../components/responses/errors.yml#/BadRequest'
+      '401':
+        $ref: '../../components/responses/errors.yml#/Unauthorized'
+      '500':
+        $ref: '../../components/responses/errors.yml#/InternalServerError'
+
+forgot:
+  post:
+    tags:
+      - auth
+    summary: Запрос кода для сброса пароля
+    operationId: v1ForgotPasswordApi
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/auth.yml#/ForgotPasswordV1Request'
+    responses:
+      '200':
+        description: Запрос на отправку кода успешно отправлен
+        content:
+          application/json:
+            schema:
+              $ref: '../../components/schemas/auth.yml#/ApiForgotPasswordV1Response'
+      '400':
+        $ref: '../../components/responses/errors.yml#/BadRequest'
+      '401':
+        $ref: '../../components/responses/errors.yml#/Unauthorized'
+      '500':
+        $ref: '../../components/responses/errors.yml#/InternalServerError'
+
+verifyCode:
+  post:
+    tags:
+      - auth
+    summary: Проверка кода для сброса пароля
+    operationId: v1VerifyCodeApi
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/auth.yml#/VerifyCodeV1Request'
+    responses:
+      '200':
+        description: Запрос на отправку кода успешно отправлен
+        content:
+          application/json:
+            schema:
+              $ref: '../../components/schemas/auth.yml#/ApiVerifyCodeV1Response'
+      '400':
+        $ref: '../../components/responses/errors.yml#/BadRequest'
+      '401':
+        $ref: '../../components/responses/errors.yml#/Unauthorized'
+      '500':
+        $ref: '../../components/responses/errors.yml#/InternalServerError'
+
+reset:
+  post:
+    tags:
+      - auth
+    summary: Сброс пароля
+    operationId: v1ResetPasswordApi
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '../../components/schemas/auth.yml#/ResetPasswordV1Request'
+    responses:
+      '200':
+        description: Запрос на отправку кода успешно отправлен
+        content:
+          application/json:
+            schema:
+              $ref: '../../components/schemas/auth.yml#/ApiResetPasswordV1Response'
+      '400':
+        $ref: '../../components/responses/errors.yml#/BadRequest'
+      '401':
+        $ref: '../../components/responses/errors.yml#/Unauthorized'
+      '500':
+        $ref: '../../components/responses/errors.yml#/InternalServerError'
