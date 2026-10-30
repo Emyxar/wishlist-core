@@ -1,5 +1,10 @@
 RegisterV1Request:
   type: object
+  required:
+    - email
+    - fullName
+    - password
+    - confirmPassword
   properties:
     email:
       type: string
@@ -39,6 +44,9 @@ ApiRegisterV1Response:
 
 LoginV1Request:
   type: object
+  required:
+    - email
+    - password
   properties:
     email:
       type: string
@@ -74,6 +82,8 @@ ApiLoginV1Response:
 
 RefreshV1Request:
   type: object
+  required:
+    - refreshToken
   properties:
     refreshToken:
       type: string
@@ -99,6 +109,9 @@ ApiRefreshV1Response:
 
 LogoutV1Request:
   type: object
+  required:
+    - accessToken
+    - refreshToken
   properties:
     accessToken:
       type: string
@@ -121,6 +134,8 @@ ApiLogoutV1Response:
 
 ForgotPasswordV1Request:
   type: object
+  required:
+    - email
   properties:
     email:
       type: string
@@ -148,6 +163,9 @@ ApiForgotPasswordV1Response:
 
 VerifyCodeV1Request:
   type: object
+  required:
+    - resetId
+    - code
   properties:
     resetId:
       type: string
@@ -178,6 +196,10 @@ ApiVerifyCodeV1Response:
 
 ResetPasswordV1Request:
   type: object
+  required:
+    - actionToken
+    - password
+    - confirmPassword
   properties:
     actionToken:
       type: string
