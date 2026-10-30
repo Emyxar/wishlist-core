@@ -8,7 +8,7 @@ BadRequest:
         status: false
         error:
           code: BAD_REQUEST
-          message: Введенные данные не соответствуют требованиям
+          message: Неверный формат запроса или поврежденный JSON
           details:
             request: Failed to read HTTP message, parse error at line 3, column 5
         timestamp: 2026-08-16T12:34:56Z
