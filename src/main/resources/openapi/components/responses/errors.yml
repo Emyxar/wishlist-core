@@ -1,5 +1,5 @@
 BadRequest:
-  description: Некорректный запрос (400)
+  description: Некорректный синтаксис запроса (400)
   content:
     application/json:
       schema:
@@ -8,6 +8,21 @@ BadRequest:
         status: false
         error:
           code: BAD_REQUEST
+          message: Введенные данные не соответствуют требованиям
+          details:
+            request: Failed to read HTTP message, parse error at line 3, column 5
+        timestamp: 2026-08-16T12:34:56Z
+
+UnprocessableEntity:
+  description: Ошибка валидации данных (422)
+  content:
+    application/json:
+      schema:
+        $ref: '../schemas/common.yml#/ApiErrorResponse'
+      example:
+        status: false
+        error:
+          code: UNPROCESSABLE_ENTITY
           message: Введенные данные не соответствуют требованиям
           details:
             email: Неверный формат адреса электронной почты

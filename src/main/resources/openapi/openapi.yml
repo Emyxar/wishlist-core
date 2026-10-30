@@ -68,6 +68,8 @@ components:
   responses:
     BadRequest:
       $ref: './components/responses/errors.yml#/BadRequest'
+    UnprocessableEntity:
+      $ref: './components/responses/errors.yml#/UnprocessableEntity'
     Unauthorized:
       $ref: './components/responses/errors.yml#/Unauthorized'
     Forbidden:
