@@ -4,7 +4,21 @@ info:
   title: API Wishlist Service
   version: 01.00.00
 
-paths: {}
+paths:
+  /api/v1/auth/register:
+    $ref: './paths/v1/auth.yml#/register'
+  /api/v1/auth/login:
+    $ref: './paths/v1/auth.yml#/login'
+  /api/v1/auth/refresh:
+    $ref: './paths/v1/auth.yml#/refresh'
+  /api/v1/auth/logout:
+    $ref: './paths/v1/auth.yml#/logout'
+  /api/v1/auth/password/forgot:
+    $ref: './paths/v1/auth.yml#/forgot'
+  /api/v1/auth/password/verify-code:
+    $ref: './paths/v1/auth.yml#/verifyCode'
+  /api/v1/auth/password/reset:
+    $ref: './paths/v1/auth.yml#/reset'
 
 components:
   schemas:
@@ -12,6 +26,44 @@ components:
       $ref: './components/schemas/common.yml#/ApiError'
     ApiErrorResponse:
       $ref: './components/schemas/common.yml#/ApiErrorResponse'
+    RegisterV1Request:
+      $ref: './components/schemas/auth.yml#/RegisterV1Request'
+    RegisterV1Response:
+      $ref: './components/schemas/auth.yml#/RegisterV1Response'
+    ApiRegisterV1Response:
+      $ref: './components/schemas/auth.yml#/ApiRegisterV1Response'
+    LoginV1Request:
+      $ref: './components/schemas/auth.yml#/LoginV1Request'
+    LoginV1Response:
+      $ref: './components/schemas/auth.yml#/LoginV1Response'
+    ApiLoginV1Response:
+      $ref: './components/schemas/auth.yml#/ApiLoginV1Response'
+    RefreshV1Request:
+      $ref: './components/schemas/auth.yml#/RefreshV1Request'
+    RefreshV1Response:
+      $ref: './components/schemas/auth.yml#/RefreshV1Response'
+    ApiRefreshV1Response:
+      $ref: './components/schemas/auth.yml#/ApiRefreshV1Response'
+    LogoutV1Request:
+      $ref: './components/schemas/auth.yml#/LogoutV1Request'
+    ApiLogoutV1Response:
+      $ref: './components/schemas/auth.yml#/ApiLogoutV1Response'
+    ForgotPasswordV1Request:
+      $ref: './components/schemas/auth.yml#/ForgotPasswordV1Request'
+    ForgotPasswordV1Response:
+      $ref: './components/schemas/auth.yml#/ForgotPasswordV1Response'
+    ApiForgotPasswordV1Response:
+      $ref: './components/schemas/auth.yml#/ApiForgotPasswordV1Response'
+    VerifyCodeV1Request:
+      $ref: './components/schemas/auth.yml#/VerifyCodeV1Request'
+    VerifyCodeV1Response:
+      $ref: './components/schemas/auth.yml#/VerifyCodeV1Response'
+    ApiVerifyCodeV1Response:
+      $ref: './components/schemas/auth.yml#/ApiVerifyCodeV1Response'
+    ResetPasswordV1Request:
+      $ref: './components/schemas/auth.yml#/ResetPasswordV1Request'
+    ApiResetPasswordV1Response:
+      $ref: './components/schemas/auth.yml#/ApiResetPasswordV1Response'
 
   responses:
     BadRequest:

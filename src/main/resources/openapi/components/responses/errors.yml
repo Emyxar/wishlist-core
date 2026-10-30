@@ -3,7 +3,7 @@ BadRequest:
   content:
     application/json:
       schema:
-        $ref: '../../openapi.yml#/components/schemas/ApiErrorResponse'
+        $ref: '../schemas/common.yml#/ApiErrorResponse'
       example:
         status: false
         error:
@@ -19,7 +19,7 @@ Unauthorized:
   content:
   application/json:
     schema:
-      $ref: '../../openapi.yml#/components/schemas/ApiErrorResponse'
+      $ref: '../schemas/common.yml#/ApiErrorResponse'
     examples:
       missingToken:
         summary: Токен отсутствует
@@ -51,7 +51,7 @@ Forbidden:
   content:
     application/json:
       schema:
-        $ref: '../../openapi.yml#/components/schemas/ApiErrorResponse'
+        $ref: '../schemas/common.yml#/ApiErrorResponse'
       example:
         status: false
         error:
@@ -65,7 +65,7 @@ InternalServerError:
   content:
     application/json:
       schema:
-        $ref: '../../openapi.yml#/components/schemas/ApiErrorResponse'
+        $ref: '../schemas/common.yml#/ApiErrorResponse'
       example:
         status: false
         error:
