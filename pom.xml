@@ -235,6 +235,8 @@
 								<interfaceOnly>true</interfaceOnly>
 								<useSpringBoot3>true</useSpringBoot3>
 								<skipDefaultInterface>true</skipDefaultInterface>
+								<sortModelPropertiesByRequiredFlag>false</sortModelPropertiesByRequiredFlag>
+								<sortParamsByRequiredFlag>false</sortParamsByRequiredFlag>
 							</configOptions>
 							<output>${project.build.directory}/generated-sources/openapi</output>
 						</configuration>

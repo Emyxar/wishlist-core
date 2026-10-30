@@ -25,12 +25,19 @@ RegisterV1Request:
 
 RegisterV1Response:
   type: object
+  required:
+    - id
   properties:
     id:
       type: string
 
 ApiRegisterV1Response:
   type: object
+  required:
+    - status
+    - data
+    - error
+    - timestamp
   properties:
     status:
       type: boolean
@@ -59,6 +66,10 @@ LoginV1Request:
 
 LoginV1Response:
   type: object
+  required:
+    - id
+    - accessToken
+    - refreshToken
   properties:
     id:
       type: string
@@ -69,6 +80,11 @@ LoginV1Response:
 
 ApiLoginV1Response:
   type: object
+  required:
+    - status
+    - data
+    - error
+    - timestamp
   properties:
     status:
       type: boolean
@@ -90,12 +106,19 @@ RefreshV1Request:
 
 RefreshV1Response:
   type: object
+  required:
+    - accessToken
   properties:
     accessToken:
       type: string
 
 ApiRefreshV1Response:
   type: object
+  required:
+    - status
+    - data
+    - error
+    - timestamp
   properties:
     status:
       type: boolean
@@ -120,6 +143,11 @@ LogoutV1Request:
 
 ApiLogoutV1Response:
   type: object
+  required:
+    - status
+    - data
+    - error
+    - timestamp
   properties:
     status:
       type: boolean
@@ -144,12 +172,19 @@ ForgotPasswordV1Request:
 
 ForgotPasswordV1Response:
   type: object
+  required:
+    - resetId
   properties:
     resetId:
       type: string
 
 ApiForgotPasswordV1Response:
   type: object
+  required:
+    - status
+    - data
+    - error
+    - timestamp
   properties:
     status:
       type: boolean
@@ -177,12 +212,19 @@ VerifyCodeV1Request:
 
 VerifyCodeV1Response:
   type: object
+  required:
+    - actionToken
   properties:
     actionToken:
       type: string
 
 ApiVerifyCodeV1Response:
   type: object
+  required:
+    - status
+    - data
+    - error
+    - timestamp
   properties:
     status:
       type: boolean
@@ -214,6 +256,11 @@ ResetPasswordV1Request:
 
 ApiResetPasswordV1Response:
   type: object
+  required:
+    - status
+    - data
+    - error
+    - timestamp
   properties:
     status:
       type: boolean

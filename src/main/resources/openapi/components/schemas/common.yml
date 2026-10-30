@@ -4,6 +4,7 @@ ApiError:
   required:
     - code
     - message
+    - details
   properties:
     code:
       type: string
@@ -18,6 +19,11 @@ ApiError:
 
 ApiErrorResponse:
   type: object
+  required:
+    - status
+    - data
+    - error
+    - timestamp
   properties:
     status:
       type: boolean
