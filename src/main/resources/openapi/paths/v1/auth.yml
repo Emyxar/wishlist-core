@@ -19,6 +19,8 @@ register:
               $ref: '../../components/schemas/auth.yml#/ApiRegisterV1Response'
       '400':
         $ref: '../../components/responses/errors.yml#/BadRequest'
+      '422':
+        $ref: '../../components/responses/errors.yml#/UnprocessableEntity'
       '500':
         $ref: '../../components/responses/errors.yml#/InternalServerError'
 
@@ -43,6 +45,8 @@ login:
               $ref: '../../components/schemas/auth.yml#/ApiLoginV1Response'
       '400':
         $ref: '../../components/responses/errors.yml#/BadRequest'
+      '422':
+        $ref: '../../components/responses/errors.yml#/UnprocessableEntity'
       '500':
         $ref: '../../components/responses/errors.yml#/InternalServerError'
 
@@ -67,6 +71,8 @@ refresh:
               $ref: '../../components/schemas/auth.yml#/ApiRefreshV1Response'
       '400':
         $ref: '../../components/responses/errors.yml#/BadRequest'
+      '422':
+        $ref: '../../components/responses/errors.yml#/UnprocessableEntity'
       '401':
         $ref: '../../components/responses/errors.yml#/Unauthorized'
       '500':
@@ -93,6 +99,8 @@ logout:
               $ref: '../../components/schemas/auth.yml#/ApiLogoutV1Response'
       '400':
         $ref: '../../components/responses/errors.yml#/BadRequest'
+      '422':
+        $ref: '../../components/responses/errors.yml#/UnprocessableEntity'
       '401':
         $ref: '../../components/responses/errors.yml#/Unauthorized'
       '500':
@@ -119,6 +127,8 @@ forgot:
               $ref: '../../components/schemas/auth.yml#/ApiForgotPasswordV1Response'
       '400':
         $ref: '../../components/responses/errors.yml#/BadRequest'
+      '422':
+        $ref: '../../components/responses/errors.yml#/UnprocessableEntity'
       '401':
         $ref: '../../components/responses/errors.yml#/Unauthorized'
       '500':
@@ -145,6 +155,8 @@ verifyCode:
               $ref: '../../components/schemas/auth.yml#/ApiVerifyCodeV1Response'
       '400':
         $ref: '../../components/responses/errors.yml#/BadRequest'
+      '422':
+        $ref: '../../components/responses/errors.yml#/UnprocessableEntity'
       '401':
         $ref: '../../components/responses/errors.yml#/Unauthorized'
       '500':
@@ -171,6 +183,8 @@ reset:
               $ref: '../../components/schemas/auth.yml#/ApiResetPasswordV1Response'
       '400':
         $ref: '../../components/responses/errors.yml#/BadRequest'
+      '422':
+        $ref: '../../components/responses/errors.yml#/UnprocessableEntity'
       '401':
         $ref: '../../components/responses/errors.yml#/Unauthorized'
       '500':
