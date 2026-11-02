@@ -1,12 +1,13 @@
-package ru.emyxar.wishlist_core.security.exceptions;
+package ru.emyxar.wishlist_core.exceptions;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.openapitools.jackson.nullable.JsonNullable;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.stereotype.Component;
 import ru.emyxar.wishlist_core.model.ApiError;
 import ru.emyxar.wishlist_core.model.ApiErrorResponse;
@@ -19,22 +20,31 @@ import java.util.Map;
 
 @Slf4j
 @Component
-public class AccessDeniedHandlerImp implements AccessDeniedHandler {
+@RequiredArgsConstructor
+public class AuthenticationEntryPointImp implements AuthenticationEntryPoint {
+
+    private final ObjectMapper objectMapper;
 
     @Override
-    public void handle(HttpServletRequest request,
-                       HttpServletResponse response,
-                       AccessDeniedException e) throws IOException, ServletException {
+    public void commence(HttpServletRequest request,
+                         HttpServletResponse response,
+                         AuthenticationException e) throws IOException, ServletException {
+
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
-        response.setStatus(403);
+        response.setStatus(401);
+
+        Object attr = request.getAttribute("tokenError");
+        String errorMessage = (attr != null)
+                ? attr.toString()
+                : e.getMessage();
 
         Map<String, Object> details = new HashMap<>();
-        details.put("reason", e.getMessage());
+        details.put("reason", errorMessage);
 
         var apiError = new ApiError();
-        apiError.setCode("FORBIDDEN");
-        apiError.setMessage("Доступ запрещён");
+        apiError.setCode("UNAUTHORIZED");
+        apiError.setMessage("Ошибка авторизации");
         apiError.setDetails(JsonNullable.of(details));
 
         var apiErrorResponse = new ApiErrorResponse();
@@ -42,6 +52,6 @@ public class AccessDeniedHandlerImp implements AccessDeniedHandler {
         apiErrorResponse.setError(JsonNullable.of(apiError));
         apiErrorResponse.setTimestamp(OffsetDateTime.now());
 
-        response.getWriter().write(new ObjectMapper().writeValueAsString(apiErrorResponse));
+        response.getWriter().write(objectMapper.writeValueAsString(apiErrorResponse));
     }
 }
