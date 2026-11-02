@@ -1,11 +1,17 @@
 package ru.emyxar.wishlist_core.exceptions;
 
+import io.jsonwebtoken.JwtException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.openapitools.jackson.nullable.JsonNullable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.servlet.NoHandlerFoundException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 import ru.emyxar.wishlist_core.model.ApiError;
 import ru.emyxar.wishlist_core.model.ApiErrorResponse;
 
@@ -18,7 +24,7 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ApiErrorResponse> handleHttpMessageNotReadable(HttpMessageNotReadableException e) {
+    public ResponseEntity<ApiErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
         Map<String, Object> details = new HashMap<>();
         details.put("request", e.getMostSpecificCause().getMessage());
 
@@ -30,8 +36,52 @@ public class GlobalExceptionHandler {
                         details));
     }
 
+    @ExceptionHandler({NoHandlerFoundException.class, NoResourceFoundException.class})
+    public ResponseEntity<?> handleNotFoundException(HttpServletRequest request) {
+        Map<String, Object> details = new HashMap<>();
+        details.put("path", request.getRequestURI());
+
+        return ResponseEntity
+                .status(404)
+                .body(buildApiErrorResponse(
+                        "NOT_FOUND",
+                        "Запрашиваемый ресурс не найден",
+                        details));
+    }
+
+    @ExceptionHandler({UnauthorizedException.class, JwtException.class, BadCredentialsException.class})
+    public ResponseEntity<ApiErrorResponse> handleUnauthorizedException(RuntimeException e) {
+        Map<String, Object> details = new HashMap<>();
+
+        String message = (e instanceof BadCredentialsException)
+                ? "Неверный логин или пароль"
+                : e.getMessage();
+
+        details.put("reason", message);
+
+        return ResponseEntity
+                .status(401)
+                .body(buildApiErrorResponse(
+                        "UNAUTHORIZED",
+                        "Ошибка авторизации",
+                        details));
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<?> handleMethodNotAllowedException(HttpServletRequest request) {
+        Map<String, Object> details = new HashMap<>();
+        details.put("path", request.getRequestURI());
+
+        return ResponseEntity
+                .status(405)
+                .body(buildApiErrorResponse(
+                        "METHOD_NOT_ALLOWED",
+                        "Метод запроса не поддерживается",
+                        details));
+    }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiErrorResponse> handleMethodArgumentNotValid(MethodArgumentNotValidException e) {
+    public ResponseEntity<ApiErrorResponse> handleMethodArgumentNotValidException(MethodArgumentNotValidException e) {
         Map<String, Object> details = new HashMap<>();
         e.getBindingResult().getFieldErrors().forEach(fieldError ->
                 details.put(fieldError.getField(), fieldError.getDefaultMessage()));
@@ -57,7 +107,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ResourceAlreadyExistsException.class)
-    public ResponseEntity<ApiErrorResponse> handleMethodArgumentNotValid(ResourceAlreadyExistsException e) {
+    public ResponseEntity<ApiErrorResponse> handleResourceAlreadyExistsException(ResourceAlreadyExistsException e) {
         Map<String, Object> details = new HashMap<>();
         details.put("reason", e.getMessage());
 
@@ -70,7 +120,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ApiErrorResponse> handleMethodArgumentNotValid(RuntimeException e) {
+    public ResponseEntity<ApiErrorResponse> handleRuntimeException(RuntimeException e) {
         Map<String, Object> details = new HashMap<>();
         details.put("exception", e.getClass().getSimpleName());
         details.put("message", e.getMessage());

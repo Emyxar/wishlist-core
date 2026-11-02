@@ -16,6 +16,12 @@ spring:
       max-file-size: ${MAX_FILE_SIZE:5MB}
       max-request-size: ${MAX_FILE_SIZE:1MB}
 
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+
 jwt:
   secret: ${JWT_SECRET}
   accessToken:
@@ -32,3 +38,9 @@ logging:
 
 frontend:
   url: ${FRONTEND_URL}
+
+app:
+  security:
+    public-urls:
+      - "/error"
+      - "/api/auth/**"
