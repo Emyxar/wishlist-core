@@ -1,0 +1,56 @@
+spring:
+  application:
+    name: wishlist-service
+
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    enabled: true
+
+  cache:
+    type: none
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  mail:
+    host: localhost
+    port: 3025
+    protocol: smtp
+
+  mvc:
+    throw-exception-if-no-handler-found: true
+  web:
+    resources:
+      add-mappings: false
+
+jwt:
+  secret: dGVzdC1zZWNyZXQta2V5LWxvbmctZW5vdWdoLWZvci1obWFjLXNoYQ==
+  accessToken:
+    expiration: 900000
+  refreshToken:
+    expiration: 86400000
+  resetPasswordToken:
+    expiration: 300000
+
+frontend:
+  url: "http://localhost:3000"
+
+app:
+  security:
+    public-urls:
+      - "/error"
+      - "/api/v1/auth/**"
+      - "/v3/api-docs/**"
+      - "/swagger-ui/**"
+
+logging:
+  level:
+    root: WARN
