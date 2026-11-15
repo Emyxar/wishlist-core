@@ -11,7 +11,9 @@ import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import ru.emyxar.wishlist_core.entities.RevokedTokenEntity;
 import ru.emyxar.wishlist_core.entities.UserEntity;
+import ru.emyxar.wishlist_core.repositories.RevokedTokenRepository;
 import ru.emyxar.wishlist_core.repositories.UserRepository;
 import ru.emyxar.wishlist_core.utils.JwtUtil;
 import tools.jackson.databind.JsonNode;
@@ -28,6 +30,7 @@ class AuthControllerV1IntegrationTest {
 
     private static final String REGISTER_URL = "/api/v1/auth/register";
     private static final String LOGIN_URL = "/api/v1/auth/login";
+    private static final String REFRESH_URL = "/api/v1/auth/refresh";
 
     private static final String EMAIL = "test@example.com";
     private static final String PASSWORD = "Passw0rd!";
@@ -39,6 +42,9 @@ class AuthControllerV1IntegrationTest {
     private UserRepository userRepository;
 
     @Autowired
+    private RevokedTokenRepository revokedTokenRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -48,6 +54,7 @@ class AuthControllerV1IntegrationTest {
 
     @BeforeEach
     void setUp() {
+        revokedTokenRepository.deleteAll();
         userRepository.deleteAll();
     }
 
@@ -247,6 +254,134 @@ class AuthControllerV1IntegrationTest {
         assertEquals("/api/v1/auth/unknown", error.get("details").get("path").asString());
     }
 
+    @Test
+    @DisplayName("Refresh: валидный refresh-токен — выдача нового access-токена")
+    void refreshSuccessTest() throws Exception {
+        registerUser(EMAIL, PASSWORD);
+        UserEntity user = userRepository.findByEmail(EMAIL).orElseThrow();
+        String refreshToken = jwtUtil.generateRefreshToken(user.getId().toString());
+
+        MvcResult result = mockMvc.perform(post(REFRESH_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(refreshRequest(refreshToken)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode body = objectMapper.readTree(result.getResponse().getContentAsString());
+        assertTrue(body.get("status").asBoolean());
+
+        String newAccessToken = body.get("data").get("accessToken").asString();
+        assertNotNull(newAccessToken);
+
+        Claims claims = jwtUtil.parseClaimsFromToken(newAccessToken);
+        assertEquals(user.getId().toString(), claims.getSubject());
+        assertEquals("access", claims.get("type", String.class));
+    }
+
+    @Test
+    @DisplayName("Refresh: access-токен вместо refresh — 401 UNAUTHORIZED")
+    void refreshWithAccessTokenTest() throws Exception {
+        registerUser(EMAIL, PASSWORD);
+        UserEntity user = userRepository.findByEmail(EMAIL).orElseThrow();
+        String accessToken = jwtUtil.generateAccessToken(user.getId().toString());
+
+        MvcResult result = mockMvc.perform(post(REFRESH_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(refreshRequest(accessToken)))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+
+        JsonNode error = errorOf(result);
+        assertEquals("UNAUTHORIZED", error.get("code").asString());
+        assertEquals("Невалидный тип токена", error.get("details").get("reason").asString());
+    }
+
+    @Test
+    @DisplayName("Refresh: невалидный токен — 401 UNAUTHORIZED")
+    void refreshWithInvalidTokenTest() throws Exception {
+        MvcResult result = mockMvc.perform(post(REFRESH_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(refreshRequest("invalid.token.here")))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+
+        JsonNode error = errorOf(result);
+        assertEquals("UNAUTHORIZED", error.get("code").asString());
+    }
+
+    @Test
+    @DisplayName("Refresh: пустой токен — 401 UNAUTHORIZED")
+    void refreshWithEmptyTokenTest() throws Exception {
+        MvcResult result = mockMvc.perform(post(REFRESH_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(refreshRequest("")))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+
+        JsonNode error = errorOf(result);
+        assertEquals("UNAUTHORIZED", error.get("code").asString());
+    }
+
+    @Test
+    @DisplayName("Refresh: отозванный refresh-токен — 401 UNAUTHORIZED")
+    void refreshWithRevokedTokenTest() throws Exception {
+        registerUser(EMAIL, PASSWORD);
+        UserEntity user = userRepository.findByEmail(EMAIL).orElseThrow();
+        String refreshToken = jwtUtil.generateRefreshToken(user.getId().toString());
+
+        String jti = jwtUtil.parseClaimsFromToken(refreshToken).getId();
+        RevokedTokenEntity revokedToken = new RevokedTokenEntity();
+        revokedToken.setJti(jti);
+        revokedToken.setExpiredTimestamp(System.currentTimeMillis() + 86_400_000L);
+        revokedTokenRepository.saveAndFlush(revokedToken);
+
+        MvcResult result = mockMvc.perform(post(REFRESH_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(refreshRequest(refreshToken)))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+
+        JsonNode error = errorOf(result);
+        assertEquals("UNAUTHORIZED", error.get("code").asString());
+        assertEquals("Недействительный или истекший токен",
+                error.get("details").get("reason").asString());
+    }
+
+    @Test
+    @DisplayName("Refresh: пользователь удалён — 401 UNAUTHORIZED")
+    void refreshWithDeletedUserTest() throws Exception {
+        registerUser(EMAIL, PASSWORD);
+        UserEntity user = userRepository.findByEmail(EMAIL).orElseThrow();
+        String refreshToken = jwtUtil.generateRefreshToken(user.getId().toString());
+
+        userRepository.deleteAll();
+
+        MvcResult result = mockMvc.perform(post(REFRESH_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(refreshRequest(refreshToken)))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+
+        JsonNode error = errorOf(result);
+        assertEquals("UNAUTHORIZED", error.get("code").asString());
+        assertEquals("Недействительный или истекший токен",
+                error.get("details").get("reason").asString());
+    }
+
+    @Test
+    @DisplayName("Refresh: отсутствует поле refreshToken — 422 UNPROCESSABLE_ENTITY")
+    void refreshWithoutTokenFieldTest() throws Exception {
+        MvcResult result = mockMvc.perform(post(REFRESH_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isUnprocessableEntity())
+                .andReturn();
+
+        JsonNode error = errorOf(result);
+        assertEquals("UNPROCESSABLE_ENTITY", error.get("code").asString());
+        assertTrue(error.get("details").has("refreshToken"));
+    }
+
     private void registerUser(String email, String password) {
         UserEntity user = new UserEntity();
         user.setEmail(email);
@@ -282,5 +417,13 @@ class AuthControllerV1IntegrationTest {
                   "password": "%s"
                 }
                 """.formatted(email, password);
+    }
+
+    private String refreshRequest(String refreshToken) {
+        return """
+                {
+                  "refreshToken": "%s"
+                }
+                """.formatted(refreshToken);
     }
 }
