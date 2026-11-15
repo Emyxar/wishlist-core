@@ -10,3 +10,9 @@ CREATE TABLE users (
     full_name VARCHAR(254) NOT NULL,
     url_avatar TEXT
 );
+
+CREATE TABLE revoked_tokens (
+    id UUID PRIMARY KEY,
+    jti VARCHAR(36) UNIQUE NOT NULL,
+    expired_timestamp BIGINT NOT NULL
+);

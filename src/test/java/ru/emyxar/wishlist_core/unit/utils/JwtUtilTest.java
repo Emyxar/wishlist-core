@@ -10,6 +10,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import ru.emyxar.wishlist_core.exceptions.UnauthorizedException;
 import ru.emyxar.wishlist_core.utils.JwtUtil;
 
+import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
 import java.util.UUID;
 
@@ -98,6 +99,71 @@ class JwtUtilTest {
         assertThrows(
                 UnauthorizedException.class,
                 () -> jwtUtil.parseClaimsFromToken(expiredToken)
+        );
+    }
+
+    @Test
+    @DisplayName("Парсинг null-токена выбрасывает UnauthorizedException")
+    void parseNullTokenThrowsUnauthorizedTest() {
+        assertThrows(
+                UnauthorizedException.class,
+                () -> jwtUtil.parseClaimsFromToken(null)
+        );
+    }
+
+    @Test
+    @DisplayName("Парсинг пустого токена выбрасывает UnauthorizedException")
+    void parseEmptyTokenThrowsUnauthorizedTest() {
+        assertThrows(
+                UnauthorizedException.class,
+                () -> jwtUtil.parseClaimsFromToken("")
+        );
+    }
+
+    @Test
+    @DisplayName("parseUserId возвращает UUID из subject токена")
+    void parseUserIdSuccessTest() {
+        String userId = UUID.randomUUID().toString();
+
+        String token = jwtUtil.generateAccessToken(userId);
+        Claims claims = jwtUtil.parseClaimsFromToken(token);
+
+        assertEquals(UUID.fromString(userId), jwtUtil.parseUserId(claims));
+    }
+
+    @Test
+    @DisplayName("parseUserId с невалидным subject выбрасывает UnauthorizedException")
+    void parseUserIdInvalidSubjectThrowsUnauthorizedTest() {
+        SecretKey key = (SecretKey) ReflectionTestUtils.getField(jwtUtil, "key");
+
+        String token = Jwts.builder()
+                .subject("not-a-uuid")
+                .signWith(key)
+                .compact();
+
+        Claims claims = jwtUtil.parseClaimsFromToken(token);
+
+        assertThrows(
+                UnauthorizedException.class,
+                () -> jwtUtil.parseUserId(claims)
+        );
+    }
+
+    @Test
+    @DisplayName("parseUserId без subject выбрасывает UnauthorizedException")
+    void parseUserIdMissingSubjectThrowsUnauthorizedTest() {
+        SecretKey key = (SecretKey) ReflectionTestUtils.getField(jwtUtil, "key");
+
+        String token = Jwts.builder()
+                .claim("type", "refresh")
+                .signWith(key)
+                .compact();
+
+        Claims claims = jwtUtil.parseClaimsFromToken(token);
+
+        assertThrows(
+                UnauthorizedException.class,
+                () -> jwtUtil.parseUserId(claims)
         );
     }
 }

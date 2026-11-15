@@ -67,7 +67,15 @@ public class JwtUtil {
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
-        } catch (JwtException e) {
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new UnauthorizedException("Недействительный или истекший токен");
+        }
+    }
+
+    public UUID parseUserId(Claims claims) {
+        try {
+            return UUID.fromString(claims.getSubject());
+        } catch (IllegalArgumentException | NullPointerException e) {
             throw new UnauthorizedException("Недействительный или истекший токен");
         }
     }
