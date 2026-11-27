@@ -31,6 +31,7 @@ class AuthControllerV1IntegrationTest {
     private static final String REGISTER_URL = "/api/v1/auth/register";
     private static final String LOGIN_URL = "/api/v1/auth/login";
     private static final String REFRESH_URL = "/api/v1/auth/refresh";
+    private static final String LOGOUT_URL = "/api/v1/auth/logout";
 
     private static final String EMAIL = "test@example.com";
     private static final String PASSWORD = "Passw0rd!";
@@ -382,6 +383,103 @@ class AuthControllerV1IntegrationTest {
         assertTrue(error.get("details").has("refreshToken"));
     }
 
+    @Test
+    @DisplayName("Logout: валидный refresh-токен — jti попадает в blacklist, refresh перестаёт работать")
+    void logoutSuccessTest() throws Exception {
+        registerUser(EMAIL, PASSWORD);
+        UserEntity user = userRepository.findByEmail(EMAIL).orElseThrow();
+        String refreshToken = jwtUtil.generateRefreshToken(user.getId().toString());
+        Claims refreshClaims = jwtUtil.parseClaimsFromToken(refreshToken);
+
+        MvcResult result = mockMvc.perform(post(LOGOUT_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(logoutRequest(refreshToken)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        JsonNode body = objectMapper.readTree(result.getResponse().getContentAsString());
+        assertTrue(body.get("status").asBoolean());
+
+        assertTrue(revokedTokenRepository.existsByJti(refreshClaims.getId()));
+        RevokedTokenEntity revoked = revokedTokenRepository.findAll().get(0);
+        assertEquals(refreshClaims.getId(), revoked.getJti());
+        assertEquals(refreshClaims.getExpiration().toInstant().getEpochSecond(),
+                revoked.getExpiredTimestamp());
+
+        // Отозванный refresh-токен больше не должен выдавать новые access-токены
+        mockMvc.perform(post(REFRESH_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(refreshRequest(refreshToken)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("Logout: повторный вызов с тем же токеном — 200, дубликатов в blacklist нет")
+    void logoutIdempotentTest() throws Exception {
+        registerUser(EMAIL, PASSWORD);
+        UserEntity user = userRepository.findByEmail(EMAIL).orElseThrow();
+        String refreshToken = jwtUtil.generateRefreshToken(user.getId().toString());
+
+        mockMvc.perform(post(LOGOUT_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(logoutRequest(refreshToken)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(post(LOGOUT_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(logoutRequest(refreshToken)))
+                .andExpect(status().isOk());
+
+        assertEquals(1, revokedTokenRepository.count());
+    }
+
+    @Test
+    @DisplayName("Logout: невалидный токен — 401 UNAUTHORIZED")
+    void logoutWithInvalidTokenTest() throws Exception {
+        MvcResult result = mockMvc.perform(post(LOGOUT_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(logoutRequest("invalid.token.here")))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+
+        JsonNode error = errorOf(result);
+        assertEquals("UNAUTHORIZED", error.get("code").asString());
+        assertEquals(0, revokedTokenRepository.count());
+    }
+
+    @Test
+    @DisplayName("Logout: access-токен вместо refresh — 401 UNAUTHORIZED")
+    void logoutWithAccessTokenTest() throws Exception {
+        registerUser(EMAIL, PASSWORD);
+        UserEntity user = userRepository.findByEmail(EMAIL).orElseThrow();
+        String accessToken = jwtUtil.generateAccessToken(user.getId().toString());
+
+        MvcResult result = mockMvc.perform(post(LOGOUT_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(logoutRequest(accessToken)))
+                .andExpect(status().isUnauthorized())
+                .andReturn();
+
+        JsonNode error = errorOf(result);
+        assertEquals("UNAUTHORIZED", error.get("code").asString());
+        assertEquals("Невалидный тип токена", error.get("details").get("reason").asString());
+        assertEquals(0, revokedTokenRepository.count());
+    }
+
+    @Test
+    @DisplayName("Logout: отсутствует поле refreshToken — 422 UNPROCESSABLE_ENTITY")
+    void logoutWithoutTokenFieldTest() throws Exception {
+        MvcResult result = mockMvc.perform(post(LOGOUT_URL)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{}"))
+                .andExpect(status().isUnprocessableEntity())
+                .andReturn();
+
+        JsonNode error = errorOf(result);
+        assertEquals("UNPROCESSABLE_ENTITY", error.get("code").asString());
+        assertTrue(error.get("details").has("refreshToken"));
+    }
+
     private void registerUser(String email, String password) {
         UserEntity user = new UserEntity();
         user.setEmail(email);
@@ -420,6 +518,14 @@ class AuthControllerV1IntegrationTest {
     }
 
     private String refreshRequest(String refreshToken) {
+        return """
+                {
+                  "refreshToken": "%s"
+                }
+                """.formatted(refreshToken);
+    }
+
+    private String logoutRequest(String refreshToken) {
         return """
                 {
                   "refreshToken": "%s"
